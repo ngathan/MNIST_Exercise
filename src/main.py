@@ -5,6 +5,7 @@ from torchvision import datasets, transforms
 from torch import optim
 import torch.nn.functional as F
 
+# using CNN to classify images
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
@@ -24,41 +25,60 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-def main():
+def cal_loss(model, eval_data, y ):
+
+    pred = model(x)         # size: batch * 10
+    # goal is to collect pred[0, y[0]], pred[1,y[1]],...pred[99, y[99]]
+    select_pred = torch.gather(pred, dim = 1, index=y)        # bach * 1
+    log_prob = torch.log(select_pred)
+    loss = -log_prob.mean()
+    return loss
+
+def train():
     train_data = datasets.MNIST('../data', train=True, download=True)
     test_data = datasets.MNIST('../data', train=False, download=True)
 
-    train_loader = torch.utils.data.DataLoader(train_data)
-    test_loader = torch.utils.data.DataLoader(test_data)
+    batch_size = 4
 
-    pdb.set_trace()
-
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size,
+                                               shuffle = True, num_workers = 2)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size = batch_size,
+                                               shuffle = True, num_workers = 2)
     #define a CNN:
     net = Net()
 
     # define a loss function and optimizer
 
-    criterion = nn.CrossntropyLoss()
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr = 0.001, momentum = 0.9)
+
 
 
     for epoch in range(2):
 
         running_loss= 0.0
-        #for i, data in enumerate(train_loader, 0):
+        for i, data in enumerate(train_loader, 0):
 
+            print(i)
+            pdb.set_trace()
+            inputs, labels = data
 
+            optimizer.zero_grad()
+            outputs = net(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
+            running_loss += loss.item
 
-
-
-# create helper functions here
-# using CNN to classify images
-#def :
+            if i % 2000 == 0:
+                print('[%d, %5d] loss: %.3f' %
+                      (epoch + 1, i + 1, running_loss / 2000))
+                running_loss = 0.0
 
 
 if __name__ == "__main__":
     ## TODO
     ## run the final function to classify the images here:
     #classify()
-    main()
+    train()
