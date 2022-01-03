@@ -1,4 +1,4 @@
-# Building MLP using MNIST dataset
+# Building DL models to classify images using MNIST dataset
 
 The task is to build a 2 layer MLP to classify images.  
 
