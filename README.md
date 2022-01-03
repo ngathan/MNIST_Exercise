@@ -1,4 +1,4 @@
-# MNIST_Exercise-
+# MNIST Exercise
 
 The task is to build a 2 layer MLP to classify images.  
 
