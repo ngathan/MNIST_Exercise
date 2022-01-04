@@ -2,33 +2,30 @@ import torch
 from torch import nn as nn      # neural network within torch
 from torchvision import datasets, transforms
 from torch import optim
-import torch.nn.functional as f
 import matplotlib.pyplot as plt
 import numpy as np
-import pdb
-
 
 class MLP(nn.Module):  # noqa
 
     def __init__(self):
         nn.Module.__init__(self)
         self.network = nn.Sequential(
-            nn.Linear(32, 50),
+            nn.Linear(28*28, 50),
             nn.ReLU(),
             nn.Linear(50, 60),
             nn.ReLU(),
-            nn.Linear(60,10),
-            nn.Softmax()
+            nn.Linear(60, 10)
+            #  nn.Softmax()
         )
 
     def forward(self, x):
-        # pdb.set_trace()
-        # x = self.pool(f.relu(self.conv1(x)))
-        # x = self.pool(f.relu(self.conv2(x)))
-        # x = torch.flatten(x, 1)
-        # x = f.relu(self.fc1(x))
-        # x = self.fc2(x)
-        return  self.network(x)
+        x = torch.flatten(x, 1)
+        y = self.network(x)
+        #  pdb.set_trace()
+        #  Y has size 4 and 10. What are these 4 dimensions?
+        #  original vector has size 4 and 784. Why size 784?: 28*28
+        return y
+
 
 def im_show(img):
     img = img / 2 + 0.5
@@ -38,14 +35,12 @@ def im_show(img):
 
 
 def train():
-
     batch_size = 4
     transform = transforms.Compose(
                 [transforms.ToTensor(),
                  transforms.Normalize([0.5], [0.5])])  # transform for black/ white images
     train_data = datasets.MNIST('../data', train=True,
                                 download=True, transform=transform)
-
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size,
                                                shuffle=True, num_workers=2)
 
@@ -63,7 +58,7 @@ def train():
 
             inputs, labels = data
             optimizer.zero_grad()
-            outputs = net(inputs)
+            outputs = mlp(inputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -75,15 +70,15 @@ def train():
                 running_loss = 0.0
 
     # save training model
-    path = './mnist_train.pth'
-    torch.save(net.state_dict(), path)
+    path = './mnist_train_mlp.pth'
+    torch.save(mlp.state_dict(), path)
     print("Finished Training")
 
 
 def test():
-    path = './mnist_train.pth'
-    net = Net()
-    net.load_state_dict(torch.load(path))
+    path = './models/mnist_train_mlp.pth'
+    mlp = MLP()
+    mlp.load_state_dict(torch.load(path))
     transform = transforms.Compose(
         [transforms.ToTensor(),
          transforms.Normalize([0.5], [0.5])])  # transform for black/ white images
@@ -98,8 +93,9 @@ def test():
 
     with torch.no_grad():
         for data in test_loader:
+
             images, labels = data
-            outputs = net(images)
+            outputs = mlp(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()

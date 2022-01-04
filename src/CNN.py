@@ -71,13 +71,13 @@ def train():
                 running_loss = 0.0
 
     # save training model
-    path = './mnist_train.pth'
+    path = './models/mnist_train.pth'
     torch.save(net.state_dict(), path)
     print("Finished Training")
 
 
 def test():
-    path = './mnist_train.pth'
+    path = './models/mnist_train.pth'
     net = Net()
     net.load_state_dict(torch.load(path))
     transform = transforms.Compose(
