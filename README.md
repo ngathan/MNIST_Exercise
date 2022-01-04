@@ -38,4 +38,9 @@ CNN architecture:
 
 Use log-loss also called cross-entropy loss. Also, report accuracy where you predict the digit with the highest probability. Try to get 90%+ accuracy on the test set.
 
+# Conclusion 
+
+1. CNN test accuracy is higher than MLP accuracy 
+2. CNN train loss is lower than MLP train loss 
+
 
